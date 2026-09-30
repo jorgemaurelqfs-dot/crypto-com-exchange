@@ -1,0 +1,2787 @@
+/* ============================================================
+   CRYPTO.COM.EXCHANGE
+   ADMIN WITHDRAWALS
+   PREMIUM FINANCIAL OPERATIONS INTERFACE
+
+   Palette:
+   - Midnight Black
+   - Deep Navy Blue
+   - Professional Gold
+   - High-contrast White / Steel Blue
+   ============================================================ */
+
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+.admin-withdrawals-app {
+  --aw-black: #02060a;
+  --aw-black-2: #030910;
+  --aw-navy: #06111b;
+  --aw-navy-2: #081624;
+  --aw-navy-3: #0b1b2a;
+  --aw-navy-4: #0e2233;
+
+  --aw-blue: #258dca;
+  --aw-blue-light: #63c3f3;
+  --aw-blue-soft: #a7dcf7;
+
+  --aw-gold: #d4af37;
+  --aw-gold-light: #f1d879;
+  --aw-gold-soft: rgba(212, 175, 55, 0.11);
+
+  --aw-white: #f8fbfd;
+  --aw-text: #e8f0f5;
+  --aw-text-soft: #bdcdd8;
+  --aw-text-muted: #8ca0af;
+  --aw-text-dim: #647987;
+
+  --aw-border: rgba(130, 167, 190, 0.15);
+  --aw-border-soft: rgba(130, 167, 190, 0.09);
+  --aw-border-blue: rgba(75, 177, 232, 0.28);
+  --aw-border-gold: rgba(212, 175, 55, 0.28);
+
+  --aw-green: #42c985;
+  --aw-green-soft: rgba(66, 201, 133, 0.11);
+
+  --aw-yellow: #e7b94f;
+  --aw-yellow-soft: rgba(231, 185, 79, 0.11);
+
+  --aw-red: #df6672;
+  --aw-red-soft: rgba(223, 102, 114, 0.11);
+
+  min-height: 100vh;
+
+  color: var(--aw-text);
+
+  background:
+    radial-gradient(
+      circle at 75% 0%,
+      rgba(27, 103, 151, 0.13),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 18% 85%,
+      rgba(212, 175, 55, 0.035),
+      transparent 28%
+    ),
+    linear-gradient(
+      145deg,
+      #02060a 0%,
+      #030a11 45%,
+      #02070d 100%
+    );
+
+  position: relative;
+  isolation: isolate;
+}
+
+
+/* ============================================================
+   BACKGROUND GRID
+   ============================================================ */
+
+.admin-withdrawals-app::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  z-index: -2;
+
+  pointer-events: none;
+
+  opacity: 0.3;
+
+  background-image:
+    linear-gradient(
+      rgba(83, 139, 174, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(83, 139, 174, 0.04) 1px,
+      transparent 1px
+    );
+
+  background-size: 46px 46px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black 0%,
+      rgba(0, 0, 0, 0.4) 70%,
+      transparent 100%
+    );
+}
+
+
+/* ============================================================
+   PAGE SELECTION / SCROLLBAR
+   ============================================================ */
+
+.admin-withdrawals-app ::selection {
+  color: #071019;
+  background: var(--aw-gold-light);
+}
+
+.admin-withdrawals-app::-webkit-scrollbar,
+.admin-withdrawals-app *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-withdrawals-app::-webkit-scrollbar-track,
+.admin-withdrawals-app *::-webkit-scrollbar-track {
+  background: #02070c;
+}
+
+.admin-withdrawals-app::-webkit-scrollbar-thumb,
+.admin-withdrawals-app *::-webkit-scrollbar-thumb {
+  background: #173044;
+  border-radius: 20px;
+}
+
+.admin-withdrawals-app::-webkit-scrollbar-thumb:hover,
+.admin-withdrawals-app *::-webkit-scrollbar-thumb:hover {
+  background: #23485f;
+}
+
+
+/* ============================================================
+   LEFT SIDEBAR
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  bottom: 0;
+
+  width: 268px;
+
+  z-index: 900;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #040b12 0%,
+      #030910 48%,
+      #02070c 100%
+    );
+
+  border-right: 1px solid rgba(130, 167, 190, 0.13);
+
+  box-shadow:
+    18px 0 50px rgba(0, 0, 0, 0.28);
+
+  scrollbar-width: thin;
+  scrollbar-color: #1a3548 #03080e;
+
+  overscroll-behavior: contain;
+}
+
+
+/*
+  IMPORTANT:
+  The sidebar itself has its own scrollbar.
+  The navigation can therefore become longer than the
+  screen without pushing the main content.
+*/
+
+.admin-withdrawals-app .dashboard-sidebar::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-withdrawals-app .dashboard-sidebar::-webkit-scrollbar-track {
+  background: #03080e;
+}
+
+.admin-withdrawals-app .dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: #183347;
+  border-radius: 20px;
+}
+
+.admin-withdrawals-app .dashboard-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #27506a;
+}
+
+
+/* ============================================================
+   SIDEBAR BRAND
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-sidebar-brand {
+  flex: 0 0 auto;
+
+  min-height: 86px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 20px 21px;
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.09);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.018),
+      transparent
+    );
+
+  position: sticky;
+  top: 0;
+
+  z-index: 2;
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-nav {
+  flex: 1 0 auto;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 18px 13px 22px;
+}
+
+.admin-withdrawals-app .dashboard-nav a {
+  position: relative;
+
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 0 14px;
+
+  color: #8ea4b3;
+
+  text-decoration: none;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.admin-withdrawals-app .dashboard-nav a span:first-child {
+  width: 21px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #708897;
+
+  font-size: 17px;
+
+  transition: color 180ms ease;
+}
+
+.admin-withdrawals-app .dashboard-nav a:hover {
+  color: var(--aw-white);
+
+  background: rgba(53, 117, 153, 0.08);
+
+  border-color: rgba(91, 150, 183, 0.12);
+
+  transform: translateX(2px);
+}
+
+.admin-withdrawals-app .dashboard-nav a:hover span:first-child {
+  color: var(--aw-blue-light);
+}
+
+.admin-withdrawals-app .dashboard-nav a.active {
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(212, 175, 55, 0.12),
+      rgba(35, 115, 160, 0.07)
+    );
+
+  border-color: rgba(212, 175, 55, 0.23);
+
+  box-shadow:
+    inset 3px 0 0 var(--aw-gold),
+    0 8px 25px rgba(0, 0, 0, 0.16);
+}
+
+.admin-withdrawals-app .dashboard-nav a.active span:first-child {
+  color: var(--aw-gold-light);
+}
+
+.admin-withdrawals-app .dashboard-nav a.active::after {
+  content: "";
+
+  position: absolute;
+
+  right: 13px;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: var(--aw-gold-light);
+
+  box-shadow:
+    0 0 10px rgba(241, 216, 121, 0.65);
+}
+
+
+/* ============================================================
+   SIDEBAR BOTTOM / SIGN OUT
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-sidebar-bottom {
+  flex: 0 0 auto;
+
+  margin-top: auto;
+
+  padding: 15px 13px 20px;
+
+  border-top: 1px solid rgba(130, 167, 190, 0.09);
+
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.admin-withdrawals-app .dashboard-signout {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 0 14px;
+
+  color: #8498a7;
+
+  background: transparent;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  font-size: 12px;
+  font-weight: 650;
+
+  text-align: left;
+
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.admin-withdrawals-app .dashboard-signout span:first-child {
+  font-size: 17px;
+}
+
+.admin-withdrawals-app .dashboard-signout:hover {
+  color: #f2a4aa;
+
+  background: rgba(223, 102, 114, 0.06);
+
+  border-color: rgba(223, 102, 114, 0.13);
+}
+
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-main {
+  min-height: 100vh;
+
+  margin-left: 268px;
+
+  background: transparent;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-header {
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 30px;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 100;
+
+  background:
+    rgba(3, 10, 16, 0.91);
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.11);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.17);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.admin-withdrawals-app .dashboard-header-copy {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.admin-withdrawals-app .dashboard-header-copy span {
+  color: var(--aw-gold-light);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.17em;
+}
+
+.admin-withdrawals-app .dashboard-header-copy strong {
+  color: var(--aw-white);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-withdrawals-app .dashboard-header-account {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  color: var(--aw-text-muted);
+
+  font-size: 11px;
+}
+
+.admin-withdrawals-app .dashboard-account-avatar {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--aw-gold-light);
+
+  background:
+    linear-gradient(
+      145deg,
+      #142c3f,
+      #07131e
+    );
+
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  box-shadow:
+    0 0 0 4px rgba(212, 175, 55, 0.035);
+}
+
+
+/* ============================================================
+   MOBILE MENU BUTTON
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-menu-button {
+  display: none;
+
+  width: 39px;
+  height: 39px;
+
+  margin-right: 13px;
+
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 4px;
+
+  background: #081522;
+
+  border: 1px solid rgba(130, 167, 190, 0.16);
+  border-radius: 7px;
+
+  cursor: pointer;
+}
+
+.admin-withdrawals-app .dashboard-menu-button span {
+  display: block;
+
+  width: 17px;
+  height: 1px;
+
+  background: #aac0ce;
+}
+
+
+/* ============================================================
+   SIDEBAR MOBILE OVERLAY
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-sidebar-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 850;
+
+  border: 0;
+
+  background: rgba(0, 0, 0, 0.67);
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-content {
+  padding: 31px;
+  max-width: 1800px;
+}
+
+
+/* ============================================================
+   WELCOME
+   ============================================================ */
+
+.admin-withdrawals-app .dashboard-welcome-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 25px;
+}
+
+.admin-withdrawals-app .dashboard-eyebrow {
+  display: block;
+
+  color: var(--aw-gold-light);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.17em;
+}
+
+.admin-withdrawals-app .dashboard-welcome-row h1 {
+  margin: 8px 0 8px;
+
+  color: var(--aw-white);
+
+  font-size: clamp(28px, 3vw, 39px);
+  line-height: 1.05;
+
+  font-weight: 760;
+
+  letter-spacing: -0.035em;
+}
+
+.admin-withdrawals-app .dashboard-welcome-row p {
+  margin: 0;
+
+  max-width: 650px;
+
+  color: var(--aw-text-soft);
+
+  font-size: 13px;
+
+  line-height: 1.65;
+}
+
+
+/* ============================================================
+   REFRESH BUTTON
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-refresh-button {
+  min-height: 41px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 16px;
+
+  color: var(--aw-white);
+
+  background:
+    linear-gradient(
+      180deg,
+      #102538,
+      #081622
+    );
+
+  border: 1px solid rgba(75, 177, 232, 0.28);
+  border-radius: 7px;
+
+  font-size: 11px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-refresh-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  background:
+    linear-gradient(
+      180deg,
+      #143049,
+      #0b1c2a
+    );
+
+  border-color: rgba(99, 195, 243, 0.48);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.admin-withdrawals-app .admin-withdraw-refresh-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-withdrawals-app .admin-refresh-icon {
+  color: var(--aw-blue-light);
+
+  font-size: 17px;
+
+  line-height: 1;
+}
+
+.admin-withdrawals-app .admin-refresh-icon.spinning {
+  animation: aw-refresh 0.8s linear infinite;
+}
+
+@keyframes aw-refresh {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-alert {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+
+  padding: 14px 15px;
+
+  border-radius: 9px;
+
+  font-size: 12px;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-icon {
+  width: 27px;
+  height: 27px;
+
+  flex: 0 0 27px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-weight: 800;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert > div:nth-child(2) {
+  flex: 1;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  font-size: 12px;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert span {
+  color: var(--aw-text-soft);
+
+  line-height: 1.5;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert button {
+  width: 26px;
+  height: 26px;
+
+  color: var(--aw-text-muted);
+
+  background: transparent;
+
+  border: 0;
+
+  font-size: 19px;
+
+  cursor: pointer;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-error {
+  background: var(--aw-red-soft);
+
+  border: 1px solid rgba(223, 102, 114, 0.2);
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-error .admin-withdraw-alert-icon {
+  color: #ffc0c5;
+
+  background: rgba(223, 102, 114, 0.13);
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-error strong {
+  color: #ffd0d4;
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-success {
+  background: var(--aw-green-soft);
+
+  border: 1px solid rgba(66, 201, 133, 0.2);
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-success .admin-withdraw-alert-icon {
+  color: #9ceac0;
+
+  background: rgba(66, 201, 133, 0.13);
+}
+
+.admin-withdrawals-app .admin-withdraw-alert-success strong {
+  color: #b6f0cf;
+}
+
+
+/* ============================================================
+   STATISTICS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-stat-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 18px;
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card {
+  position: relative;
+
+  overflow: hidden;
+
+  min-height: 125px;
+
+  padding: 19px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10, 25, 38, 0.98),
+      rgba(4, 12, 20, 0.98)
+    );
+
+  border: 1px solid var(--aw-border);
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 13px 35px rgba(0, 0, 0, 0.16),
+    inset 0 1px rgba(255, 255, 255, 0.025);
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(130, 167, 190, 0.25);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.21);
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card::before {
+  content: "";
+
+  position: absolute;
+
+  right: -55px;
+  top: -55px;
+
+  width: 130px;
+  height: 130px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 141, 202, 0.055);
+
+  filter: blur(7px);
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card:nth-child(2)::before {
+  background: rgba(212, 175, 55, 0.05);
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card:nth-child(3)::before {
+  background: rgba(66, 201, 133, 0.05);
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card:nth-child(4)::before {
+  background: rgba(99, 195, 243, 0.05);
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card > span {
+  display: block;
+
+  color: var(--aw-text-muted);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.12em;
+
+  margin-bottom: 12px;
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card strong {
+  display: block;
+
+  color: var(--aw-white);
+
+  font-size: 27px;
+
+  line-height: 1;
+
+  font-weight: 760;
+
+  letter-spacing: -0.025em;
+}
+
+.admin-withdrawals-app .admin-withdraw-stat-card small {
+  display: block;
+
+  margin-top: 11px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-toolbar-card {
+  display: flex;
+  align-items: flex-end;
+
+  gap: 13px;
+
+  margin-bottom: 16px;
+
+  padding: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(8, 20, 31, 0.97),
+      rgba(4, 12, 20, 0.97)
+    );
+
+  border: 1px solid var(--aw-border);
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.13);
+}
+
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-search {
+  position: relative;
+
+  flex: 1;
+
+  min-width: 250px;
+}
+
+.admin-withdrawals-app .admin-withdraw-search > span {
+  position: absolute;
+
+  left: 13px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #6e8999;
+
+  font-size: 18px;
+
+  pointer-events: none;
+}
+
+.admin-withdrawals-app .admin-withdraw-search input {
+  width: 100%;
+
+  height: 42px;
+
+  padding:
+    0 13px 0 38px;
+
+  color: var(--aw-white);
+
+  background: #030a11;
+
+  border: 1px solid rgba(130, 167, 190, 0.14);
+
+  border-radius: 7px;
+
+  outline: none;
+
+  font-size: 11px;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-search input::placeholder {
+  color: #637987;
+}
+
+.admin-withdrawals-app .admin-withdraw-search input:focus {
+  background: #06101a;
+
+  border-color: rgba(99, 195, 243, 0.46);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 141, 202, 0.07);
+}
+
+
+/* ============================================================
+   FILTER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-filter {
+  min-width: 175px;
+}
+
+.admin-withdrawals-app .admin-withdraw-filter label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.09em;
+}
+
+.admin-withdrawals-app .admin-withdraw-filter select {
+  width: 100%;
+
+  height: 42px;
+
+  padding: 0 12px;
+
+  color: var(--aw-text);
+
+  background: #030a11;
+
+  border: 1px solid rgba(130, 167, 190, 0.14);
+
+  border-radius: 7px;
+
+  outline: none;
+
+  font-size: 11px;
+
+  cursor: pointer;
+}
+
+.admin-withdrawals-app .admin-withdraw-filter select:focus {
+  border-color: rgba(99, 195, 243, 0.46);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 141, 202, 0.07);
+}
+
+.admin-withdrawals-app .admin-withdraw-filter option {
+  background: #07111b;
+
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   RESULT COUNT
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-result-count {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 5px;
+
+  color: var(--aw-text-muted);
+
+  font-size: 10px;
+  font-weight: 650;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   TABLE CARD
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table-card {
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(7, 18, 29, 0.985),
+      rgba(3, 10, 17, 0.985)
+    );
+
+  border: 1px solid var(--aw-border);
+
+  border-radius: 11px;
+
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ============================================================
+   TABLE HEADER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 70px;
+
+  padding: 15px 18px;
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.09);
+}
+
+.admin-withdrawals-app .admin-withdraw-table-header .dashboard-eyebrow {
+  margin-bottom: 4px;
+}
+
+.admin-withdrawals-app .admin-withdraw-table-header h2 {
+  margin: 0;
+
+  color: var(--aw-white);
+
+  font-size: 14px;
+
+  font-weight: 750;
+}
+
+.admin-withdrawals-app .admin-withdraw-queue-indicator {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #91a6b4;
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.admin-withdrawals-app .admin-withdraw-queue-indicator > span {
+  width: 6px;
+  height: 6px;
+
+  display: block;
+
+  border-radius: 50%;
+
+  background: var(--aw-green);
+
+  box-shadow:
+    0 0 0 4px rgba(66, 201, 133, 0.07),
+    0 0 10px rgba(66, 201, 133, 0.4);
+}
+
+
+/* ============================================================
+   CORRECT TABLE WRAPPER FOR YOUR TSX
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    #1b3a4e
+    #030910;
+}
+
+.admin-withdrawals-app .admin-withdraw-table-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-table-wrap::-webkit-scrollbar-track {
+  background: #030910;
+}
+
+.admin-withdrawals-app .admin-withdraw-table-wrap::-webkit-scrollbar-thumb {
+  background: #1b3a4e;
+
+  border-radius: 20px;
+}
+
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table {
+  width: 100%;
+
+  min-width: 1120px;
+
+  border-collapse: collapse;
+
+  table-layout: auto;
+}
+
+.admin-withdrawals-app .admin-withdraw-table thead {
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+.admin-withdrawals-app .admin-withdraw-table th {
+  height: 43px;
+
+  padding: 0 15px;
+
+  color: #78909f;
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.1);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  text-align: left;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.1em;
+
+  white-space: nowrap;
+}
+
+.admin-withdrawals-app .admin-withdraw-table td {
+  padding: 14px 15px;
+
+  color: var(--aw-text-soft);
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.065);
+
+  font-size: 11px;
+
+  vertical-align: middle;
+}
+
+.admin-withdrawals-app .admin-withdraw-table tbody tr {
+  transition: background 150ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-table tbody tr:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(37, 141, 202, 0.045),
+      rgba(212, 175, 55, 0.015)
+    );
+}
+
+.admin-withdrawals-app .admin-withdraw-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+/* ============================================================
+   REQUEST / REFERENCE
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table td:first-child {
+  min-width: 155px;
+}
+
+.admin-withdrawals-app .admin-withdraw-reference {
+  display: block;
+
+  padding: 0;
+
+  color: var(--aw-blue-light);
+
+  background: transparent;
+
+  border: 0;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 10px;
+  font-weight: 750;
+
+  letter-spacing: 0.015em;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.admin-withdrawals-app .admin-withdraw-reference:hover {
+  color: var(--aw-gold-light);
+
+  text-decoration: underline;
+}
+
+.admin-withdrawals-app .admin-withdraw-table td:first-child small {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 9px;
+}
+
+
+/* ============================================================
+   USER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-user {
+  min-width: 135px;
+}
+
+.admin-withdrawals-app .admin-withdraw-user strong {
+  display: block;
+
+  color: var(--aw-text);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-withdrawals-app .admin-withdraw-user span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--aw-text-muted);
+
+  font-size: 9px;
+}
+
+
+/* ============================================================
+   ASSET
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-asset {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  white-space: nowrap;
+}
+
+.admin-withdrawals-app .admin-withdraw-asset > span:first-child {
+  width: 27px;
+  height: 27px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--aw-gold-light);
+
+  background:
+    linear-gradient(
+      145deg,
+      #12283a,
+      #07111b
+    );
+
+  border: 1px solid rgba(212, 175, 55, 0.19);
+
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-withdrawals-app .admin-withdraw-asset strong {
+  color: var(--aw-white);
+
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.admin-withdrawals-app .admin-withdraw-asset small {
+  color: var(--aw-text-dim);
+
+  font-size: 8px;
+}
+
+
+/* ============================================================
+   AMOUNT COLUMN
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-table td:nth-child(4) > strong {
+  display: inline-block;
+
+  color: var(--aw-white);
+
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.admin-withdrawals-app .admin-withdraw-table td:nth-child(4) > small {
+  margin-left: 5px;
+
+  color: var(--aw-text-muted);
+
+  font-size: 9px;
+}
+
+.admin-withdrawals-app .admin-withdraw-table td:nth-child(4) em {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 8px;
+
+  font-style: normal;
+}
+
+
+/* ============================================================
+   DESTINATION
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-address {
+  max-width: 180px;
+
+  padding: 0;
+
+  display: block;
+
+  color: #a9c5d5;
+
+  background: transparent;
+
+  border: 0;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 9px;
+
+  line-height: 1.5;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  white-space: nowrap;
+}
+
+.admin-withdrawals-app .admin-withdraw-address:hover {
+  color: var(--aw-blue-light);
+
+  text-decoration: underline;
+}
+
+.admin-withdrawals-app .admin-withdraw-table td:nth-child(5) small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 8px;
+}
+
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-status {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  min-width: 83px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 0.07em;
+
+  text-transform: uppercase;
+
+  border: 1px solid transparent;
+}
+
+.admin-withdrawals-app .admin-withdraw-status > span {
+  width: 5px;
+  height: 5px;
+
+  flex: 0 0 5px;
+
+  border-radius: 50%;
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-pending {
+  color: #f2d37a;
+
+  background: var(--aw-yellow-soft);
+
+  border-color: rgba(231, 185, 79, 0.22);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-pending > span {
+  background: var(--aw-yellow);
+
+  box-shadow: 0 0 7px rgba(231, 185, 79, 0.45);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-processing {
+  color: #9bd7f6;
+
+  background: rgba(37, 141, 202, 0.1);
+
+  border-color: rgba(75, 177, 232, 0.23);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-processing > span {
+  background: var(--aw-blue-light);
+
+  box-shadow: 0 0 7px rgba(99, 195, 243, 0.4);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-completed {
+  color: #8de1b3;
+
+  background: var(--aw-green-soft);
+
+  border-color: rgba(66, 201, 133, 0.21);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-completed > span {
+  background: var(--aw-green);
+
+  box-shadow: 0 0 7px rgba(66, 201, 133, 0.4);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-rejected,
+.admin-withdrawals-app .admin-withdraw-status.status-cancelled {
+  color: #f3a4aa;
+
+  background: var(--aw-red-soft);
+
+  border-color: rgba(223, 102, 114, 0.21);
+}
+
+.admin-withdrawals-app .admin-withdraw-status.status-rejected > span,
+.admin-withdrawals-app .admin-withdraw-status.status-cancelled > span {
+  background: var(--aw-red);
+
+  box-shadow: 0 0 7px rgba(223, 102, 114, 0.4);
+}
+
+
+/* ============================================================
+   DATE
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-date {
+  color: #9aadb9;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  white-space: nowrap;
+}
+
+.admin-withdrawals-app .admin-withdraw-actions button {
+  min-height: 29px;
+
+  padding: 0 9px;
+
+  border-radius: 5px;
+
+  font-size: 9px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.admin-withdrawals-app .admin-withdraw-view-button {
+  color: #a9d9f4;
+
+  background: rgba(37, 141, 202, 0.07);
+
+  border: 1px solid rgba(75, 177, 232, 0.18);
+}
+
+.admin-withdrawals-app .admin-withdraw-view-button:hover {
+  color: #ffffff;
+
+  background: rgba(37, 141, 202, 0.14);
+
+  border-color: rgba(99, 195, 243, 0.38);
+}
+
+.admin-withdrawals-app .admin-withdraw-process-button {
+  color: var(--aw-gold-light);
+
+  background: rgba(212, 175, 55, 0.07);
+
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.admin-withdrawals-app .admin-withdraw-process-button:hover {
+  background: rgba(212, 175, 55, 0.14);
+
+  border-color: rgba(212, 175, 55, 0.38);
+}
+
+.admin-withdrawals-app .admin-withdraw-complete-button {
+  color: #8de1b3;
+
+  background: rgba(66, 201, 133, 0.07);
+
+  border: 1px solid rgba(66, 201, 133, 0.19);
+}
+
+.admin-withdrawals-app .admin-withdraw-complete-button:hover {
+  background: rgba(66, 201, 133, 0.13);
+
+  border-color: rgba(66, 201, 133, 0.35);
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-loading {
+  min-height: 310px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.admin-withdrawals-app .admin-withdraw-spinner {
+  width: 28px;
+  height: 28px;
+
+  margin-bottom: 14px;
+
+  border: 2px solid rgba(255, 255, 255, 0.1);
+
+  border-top-color: var(--aw-gold);
+
+  border-radius: 50%;
+
+  animation: aw-spin 0.8s linear infinite;
+}
+
+.admin-withdrawals-app .admin-withdraw-loading strong {
+  color: var(--aw-text);
+
+  font-size: 12px;
+}
+
+.admin-withdrawals-app .admin-withdraw-loading > span {
+  margin-top: 5px;
+
+  color: var(--aw-text-muted);
+
+  font-size: 10px;
+}
+
+@keyframes aw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-empty {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.admin-withdrawals-app .admin-withdraw-empty > div {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 14px;
+
+  color: var(--aw-gold-light);
+
+  background: rgba(212, 175, 55, 0.07);
+
+  border: 1px solid rgba(212, 175, 55, 0.15);
+
+  border-radius: 50%;
+
+  font-size: 20px;
+}
+
+.admin-withdrawals-app .admin-withdraw-empty strong {
+  color: var(--aw-text);
+
+  font-size: 13px;
+}
+
+.admin-withdrawals-app .admin-withdraw-empty p {
+  margin: 7px 0 0;
+
+  color: var(--aw-text-muted);
+
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   MODAL BACKDROP
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-modal-backdrop {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 1200;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 22px;
+
+  background: rgba(1, 5, 9, 0.8);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  animation: aw-modal-backdrop 160ms ease;
+}
+
+@keyframes aw-modal-backdrop {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-modal {
+  width: min(760px, 100%);
+
+  max-height: calc(100vh - 44px);
+
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      145deg,
+      #0a1926,
+      #040d15
+    );
+
+  border: 1px solid rgba(130, 167, 190, 0.19);
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.58),
+    inset 0 1px rgba(255, 255, 255, 0.025);
+
+  animation: aw-modal-in 190ms ease;
+}
+
+@keyframes aw-modal-in {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(10px)
+      scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* ============================================================
+   MODAL HEADER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-modal-header {
+  min-height: 75px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 17px 20px;
+
+  border-bottom: 1px solid rgba(130, 167, 190, 0.09);
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-header h2 {
+  margin: 6px 0 0;
+
+  color: var(--aw-white);
+
+  font-size: 18px;
+
+  font-weight: 760;
+
+  letter-spacing: -0.015em;
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-close {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #8498a7;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(130, 167, 190, 0.13);
+
+  border-radius: 6px;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-close:hover {
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border-color: rgba(130, 167, 190, 0.25);
+}
+
+
+/* ============================================================
+   DETAILS STATUS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-details-status {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 17px 20px 0;
+}
+
+.admin-withdrawals-app .admin-withdraw-details-status small {
+  color: var(--aw-text-muted);
+
+  font-size: 9px;
+}
+
+
+/* ============================================================
+   DETAILS GRID
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-detail-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 1px;
+
+  margin: 18px 20px;
+
+  overflow: hidden;
+
+  background: rgba(130, 167, 190, 0.08);
+
+  border: 1px solid rgba(130, 167, 190, 0.08);
+
+  border-radius: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-detail-grid > div {
+  padding: 13px 14px;
+
+  background: rgba(3, 11, 18, 0.92);
+}
+
+.admin-withdrawals-app .admin-withdraw-detail-grid > div > span,
+.admin-withdrawals-app .admin-withdraw-detail-block > span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.09em;
+}
+
+.admin-withdrawals-app .admin-withdraw-detail-grid strong {
+  display: block;
+
+  color: var(--aw-text);
+
+  font-size: 11px;
+  font-weight: 650;
+
+  line-height: 1.5;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   DETAIL BLOCKS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-detail-block {
+  margin: 0 20px 14px;
+
+  padding: 13px 14px;
+
+  background: rgba(3, 11, 18, 0.85);
+
+  border: 1px solid rgba(130, 167, 190, 0.09);
+
+  border-radius: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-detail-block > div {
+  color: var(--aw-text-soft);
+
+  font-size: 11px;
+
+  line-height: 1.55;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   FULL ADDRESS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-address-full {
+  margin-top: 8px;
+
+  padding: 11px 12px;
+
+  color: #afd0df;
+
+  background: #02080e;
+
+  border: 1px solid rgba(130, 167, 190, 0.1);
+
+  border-radius: 6px;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 10px;
+
+  line-height: 1.65;
+
+  word-break: break-all;
+}
+
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-note-box {
+  margin: 0 20px 14px;
+
+  padding: 13px 14px;
+
+  background:
+    rgba(212, 175, 55, 0.045);
+
+  border-left: 2px solid rgba(212, 175, 55, 0.45);
+
+  border-top: 1px solid rgba(212, 175, 55, 0.08);
+  border-right: 1px solid rgba(212, 175, 55, 0.08);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+
+  border-radius: 0 7px 7px 0;
+}
+
+.admin-withdrawals-app .admin-withdraw-note-box > span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: var(--aw-gold-light);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.09em;
+}
+
+.admin-withdrawals-app .admin-withdraw-note-box p {
+  margin: 0;
+
+  color: var(--aw-text-soft);
+
+  font-size: 11px;
+
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   TRANSACTION HASH
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-hash {
+  margin-top: 8px;
+
+  padding: 11px 12px;
+
+  color: #9ed7f4;
+
+  background: #02080e;
+
+  border: 1px solid rgba(75, 177, 232, 0.13);
+
+  border-radius: 6px;
+
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+
+  font-size: 9px;
+
+  line-height: 1.6;
+
+  word-break: break-all;
+}
+
+
+/* ============================================================
+   MODAL ACTIONS
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 7px;
+
+  padding: 15px 20px;
+
+  border-top: 1px solid rgba(130, 167, 190, 0.09);
+
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-actions button {
+  min-height: 38px;
+
+  padding: 0 14px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.admin-withdrawals-app .admin-withdraw-modal-actions button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   SECONDARY
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-secondary-button {
+  color: var(--aw-text-soft);
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(130, 167, 190, 0.15);
+}
+
+.admin-withdrawals-app .admin-withdraw-secondary-button:hover:not(:disabled) {
+  color: var(--aw-white);
+
+  background: rgba(255, 255, 255, 0.055);
+
+  border-color: rgba(130, 167, 190, 0.26);
+}
+
+
+/* ============================================================
+   PRIMARY / GOLD
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-primary-button {
+  color: #071019;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--aw-gold-light),
+      var(--aw-gold)
+    );
+
+  border: 1px solid rgba(241, 216, 121, 0.48);
+
+  box-shadow:
+    0 6px 20px rgba(212, 175, 55, 0.1);
+}
+
+.admin-withdrawals-app .admin-withdraw-primary-button:hover:not(:disabled) {
+  background:
+    linear-gradient(
+      135deg,
+      #f5df91,
+      #dcb946
+    );
+
+  box-shadow:
+    0 9px 28px rgba(212, 175, 55, 0.18);
+}
+
+
+/* ============================================================
+   DANGER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-danger-button {
+  color: #f3a4aa;
+
+  background: rgba(223, 102, 114, 0.075);
+
+  border: 1px solid rgba(223, 102, 114, 0.22);
+}
+
+.admin-withdrawals-app .admin-withdraw-danger-button:hover:not(:disabled) {
+  color: #ffd1d5;
+
+  background: rgba(223, 102, 114, 0.13);
+
+  border-color: rgba(223, 102, 114, 0.38);
+}
+
+
+/* ============================================================
+   ACTION MODAL
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-action-modal {
+  width: min(590px, 100%);
+}
+
+
+/* ============================================================
+   ACTION SUMMARY
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-action-summary {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1px;
+
+  margin: 18px 20px;
+
+  overflow: hidden;
+
+  background: rgba(130, 167, 190, 0.08);
+
+  border: 1px solid rgba(130, 167, 190, 0.08);
+
+  border-radius: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-action-summary > div {
+  padding: 12px;
+
+  background: #040c14;
+}
+
+.admin-withdrawals-app .admin-withdraw-action-summary span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
+}
+
+.admin-withdrawals-app .admin-withdraw-action-summary strong {
+  color: var(--aw-text);
+
+  font-size: 10px;
+
+  line-height: 1.5;
+
+  word-break: break-word;
+}
+
+
+/* ============================================================
+   COMPLETION WARNING
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-completion-warning {
+  display: flex;
+
+  gap: 11px;
+
+  margin: 0 20px 18px;
+
+  padding: 13px 14px;
+
+  color: #eecf78;
+
+  background:
+    rgba(231, 185, 79, 0.065);
+
+  border: 1px solid rgba(231, 185, 79, 0.18);
+
+  border-radius: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-completion-warning > div:first-child {
+  width: 25px;
+  height: 25px;
+
+  flex: 0 0 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #f4d77f;
+
+  background: rgba(231, 185, 79, 0.1);
+
+  border-radius: 50%;
+
+  font-weight: 800;
+}
+
+.admin-withdrawals-app .admin-withdraw-completion-warning strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #f4d77f;
+
+  font-size: 11px;
+}
+
+.admin-withdrawals-app .admin-withdraw-completion-warning p {
+  margin: 0;
+
+  color: #b9a971;
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+
+/* ============================================================
+   ACTION MESSAGE
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-action-message {
+  margin: 0 20px 18px;
+
+  padding: 13px 14px;
+
+  background: rgba(37, 141, 202, 0.045);
+
+  border: 1px solid rgba(75, 177, 232, 0.11);
+
+  border-radius: 8px;
+}
+
+.admin-withdrawals-app .admin-withdraw-action-message strong {
+  color: var(--aw-text);
+
+  font-size: 11px;
+}
+
+.admin-withdrawals-app .admin-withdraw-action-message p {
+  margin: 5px 0 0;
+
+  color: var(--aw-text-muted);
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-form-field {
+  margin: 0 20px 17px;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #93a8b7;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.08em;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field label span {
+  color: #e89a9f;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field input,
+.admin-withdrawals-app .admin-withdraw-form-field textarea {
+  width: 100%;
+
+  color: var(--aw-white);
+
+  background: #02090f;
+
+  border: 1px solid rgba(130, 167, 190, 0.14);
+
+  border-radius: 7px;
+
+  outline: none;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field input {
+  height: 42px;
+
+  padding: 0 12px;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field textarea {
+  min-height: 90px;
+
+  padding: 11px 12px;
+
+  resize: vertical;
+
+  line-height: 1.55;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field input::placeholder,
+.admin-withdrawals-app .admin-withdraw-form-field textarea::placeholder {
+  color: #536a79;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field input:focus,
+.admin-withdrawals-app .admin-withdraw-form-field textarea:focus {
+  border-color: rgba(99, 195, 243, 0.45);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 141, 202, 0.065);
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field input:disabled,
+.admin-withdrawals-app .admin-withdraw-form-field textarea:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+.admin-withdrawals-app .admin-withdraw-form-field > small {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--aw-text-dim);
+
+  font-size: 9px;
+}
+
+
+/* ============================================================
+   BUTTON SPINNER
+   ============================================================ */
+
+.admin-withdrawals-app .admin-withdraw-button-spinner {
+  width: 12px;
+  height: 12px;
+
+  display: inline-block;
+
+  margin-right: 6px;
+
+  vertical-align: -2px;
+
+  border: 2px solid rgba(7, 16, 25, 0.25);
+
+  border-top-color: #071019;
+
+  border-radius: 50%;
+
+  animation: aw-spin 0.7s linear infinite;
+}
+
+
+/* ============================================================
+   FOCUS
+   ============================================================ */
+
+.admin-withdrawals-app button:focus-visible,
+.admin-withdrawals-app input:focus-visible,
+.admin-withdrawals-app select:focus-visible,
+.admin-withdrawals-app textarea:focus-visible,
+.admin-withdrawals-app a:focus-visible {
+  outline: 2px solid rgba(99, 195, 243, 0.55);
+
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
+
+@media (max-width: 1200px) {
+  .admin-withdrawals-app .admin-withdraw-stat-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-withdrawals-app .dashboard-content {
+    padding: 25px;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE — MOBILE NAV
+   ============================================================ */
+
+@media (max-width: 1000px) {
+  .admin-withdrawals-app .dashboard-sidebar {
+    transform: translateX(-105%);
+
+    transition:
+      transform 220ms ease;
+
+    box-shadow:
+      20px 0 60px rgba(0, 0, 0, 0.48);
+  }
+
+  .admin-withdrawals-app .dashboard-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-withdrawals-app .dashboard-main {
+    margin-left: 0;
+  }
+
+  .admin-withdrawals-app .dashboard-menu-button {
+    display: flex;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE — SMALLER SCREENS
+   ============================================================ */
+
+@media (max-width: 760px) {
+  .admin-withdrawals-app .dashboard-content {
+    padding: 20px 15px 30px;
+  }
+
+  .admin-withdrawals-app .dashboard-welcome-row {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .admin-withdrawals-app .dashboard-welcome-row h1 {
+    font-size: 29px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-refresh-button {
+    width: 100%;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-toolbar-card {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-search {
+    min-width: 0;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-filter {
+    width: 100%;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-result-count {
+    min-height: auto;
+
+    padding: 4px 0;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-table {
+    min-width: 1120px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-action-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-modal-backdrop {
+    padding: 10px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-modal {
+    max-height: calc(100vh - 20px);
+
+    border-radius: 10px;
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVE — PHONE
+   ============================================================ */
+
+@media (max-width: 520px) {
+  .admin-withdrawals-app .dashboard-header {
+    min-height: 65px;
+
+    padding: 0 15px;
+  }
+
+  .admin-withdrawals-app .dashboard-header-account {
+    display: none;
+  }
+
+  .admin-withdrawals-app .dashboard-content {
+    padding: 18px 12px 25px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-table-header {
+    padding: 14px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-table-header {
+    align-items: flex-start;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-queue-indicator {
+    display: none;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-modal-actions {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-modal-actions button {
+    width: 100%;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-detail-grid,
+  .admin-withdrawals-app .admin-withdraw-note-box,
+  .admin-withdrawals-app .admin-withdraw-detail-block {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  .admin-withdrawals-app .admin-withdraw-details-status {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-withdrawals-app *,
+  .admin-withdrawals-app *::before,
+  .admin-withdrawals-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+
+    transition-duration: 0.01ms !important;
+  }
+}
