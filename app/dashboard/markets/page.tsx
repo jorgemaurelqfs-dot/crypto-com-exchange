@@ -25,10 +25,20 @@ type Profile = {
   verification_status: string;
 };
 
+type MarketApiAsset = {
+  id?: unknown;
+  symbol?: unknown;
+  name?: unknown;
+  price?: unknown;
+  change24h?: unknown;
+  volume24h?: unknown;
+  marketCap?: unknown;
+};
+
 type MarketApiResponse = {
-  markets?: MarketAsset[];
-  assets?: MarketAsset[];
-  data?: MarketAsset[];
+  markets?: unknown;
+  assets?: unknown;
+  data?: unknown;
 };
 
 const FALLBACK_ASSETS = [
@@ -58,55 +68,101 @@ const assetIcons: Record<string, string> = {
   CCT: "C",
 };
 
-function formatPrice(value: number) {
-  if (!Number.isFinite(value)) return "—";
+function safeNumber(value: unknown, fallback = 0) {
+  const numericValue = Number(value);
 
-  if (value >= 1000) {
-    return value.toLocaleString("en-US", {
+  return Number.isFinite(numericValue)
+    ? numericValue
+    : fallback;
+}
+
+function optionalNumber(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
+
+  const numericValue = Number(value);
+
+  return Number.isFinite(numericValue)
+    ? numericValue
+    : undefined;
+}
+
+function formatPrice(value: unknown) {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return "—";
+  }
+
+  if (numericValue >= 1000) {
+    return numericValue.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
   }
 
-  if (value >= 1) {
-    return value.toLocaleString("en-US", {
+  if (numericValue >= 1) {
+    return numericValue.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 4,
     });
   }
 
-  return value.toLocaleString("en-US", {
+  return numericValue.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 8,
   });
 }
 
-function formatCompact(value?: number) {
-  if (value === undefined || !Number.isFinite(value)) {
+function formatCompact(value: unknown) {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
     return "—";
   }
 
-  if (value >= 1_000_000_000_000) {
-    return `$${(value / 1_000_000_000_000).toFixed(2)}T`;
+  if (numericValue >= 1_000_000_000_000) {
+    return `$${(numericValue / 1_000_000_000_000).toFixed(2)}T`;
   }
 
-  if (value >= 1_000_000_000) {
-    return `$${(value / 1_000_000_000).toFixed(2)}B`;
+  if (numericValue >= 1_000_000_000) {
+    return `$${(numericValue / 1_000_000_000).toFixed(2)}B`;
   }
 
-  if (value >= 1_000_000) {
-    return `$${(value / 1_000_000).toFixed(2)}M`;
+  if (numericValue >= 1_000_000) {
+    return `$${(numericValue / 1_000_000).toFixed(2)}M`;
   }
 
-  if (value >= 1_000) {
-    return `$${(value / 1_000).toFixed(2)}K`;
+  if (numericValue >= 1_000) {
+    return `$${(numericValue / 1_000).toFixed(2)}K`;
   }
 
-  return `$${value.toFixed(2)}`;
+  return `$${numericValue.toFixed(2)}`;
+}
+
+function formatChange(value: unknown) {
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return "—";
+  }
+
+  return `${numericValue >= 0 ? "+" : ""}${numericValue.toFixed(
+    2,
+  )}%`;
+}
+
+function isValidChange(value: unknown) {
+  const numericValue = Number(value);
+
+  return Number.isFinite(numericValue);
 }
 
 function formatUpdated(date: Date | null) {
-  if (!date) return "Waiting for market data";
+  if (!date) {
+    return "Waiting for market data";
+  }
 
   return date.toLocaleTimeString("en-US", {
     hour: "2-digit",
@@ -122,39 +178,52 @@ export default function MarketsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [markets, setMarkets] = useState<MarketAsset[]>([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "gainers" | "losers">("all");
+  const [filter, setFilter] = useState<
+    "all" | "gainers" | "losers"
+  >("all");
   const [loading, setLoading] = useState(true);
   const [marketLoading, setMarketLoading] = useState(true);
   const [error, setError] = useState("");
   const [marketError, setMarketError] = useState("");
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [lastUpdated, setLastUpdated] =
+    useState<Date | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadProfile = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      router.replace("/login");
-      return;
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+
+      const { data, error: profileError } =
+        await supabase
+          .from("profiles")
+          .select(
+            "account_id, username, full_name, account_status, verification_status",
+          )
+          .eq("id", user.id)
+          .single();
+
+      if (profileError) {
+        setError(profileError.message);
+      } else {
+        setProfile(data);
+      }
+    } catch (profileLoadError) {
+      const message =
+        profileLoadError instanceof Error
+          ? profileLoadError.message
+          : "Unable to load your account.";
+
+      setError(message);
+    } finally {
+      setLoading(false);
     }
-
-    const { data, error: profileError } = await supabase
-      .from("profiles")
-      .select(
-        "account_id, username, full_name, account_status, verification_status"
-      )
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      setError(profileError.message);
-    } else {
-      setProfile(data);
-    }
-
-    setLoading(false);
   };
 
   const loadMarkets = async () => {
@@ -168,39 +237,72 @@ export default function MarketsPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Unable to load current market data.");
+        throw new Error(
+          "Unable to load current market data.",
+        );
       }
 
-      const payload = (await response.json()) as MarketApiResponse;
+      const payload =
+        (await response.json()) as MarketApiResponse;
 
       const receivedMarkets =
-        payload.markets ?? payload.assets ?? payload.data ?? [];
+        payload.markets ??
+        payload.assets ??
+        payload.data ??
+        [];
 
       if (!Array.isArray(receivedMarkets)) {
-        throw new Error("The market response has an invalid format.");
+        throw new Error(
+          "The market response has an invalid format.",
+        );
       }
 
-      const normalized = receivedMarkets
-        .filter(
-          (asset) =>
-            asset &&
-            typeof asset.symbol === "string" &&
-            typeof asset.name === "string"
-        )
-        .map((asset) => ({
-          ...asset,
-          symbol: asset.symbol.toUpperCase(),
-          price: Number(asset.price),
-          change24h: Number(asset.change24h ?? 0),
-          volume24h:
-            asset.volume24h !== undefined
-              ? Number(asset.volume24h)
-              : undefined,
-          marketCap:
-            asset.marketCap !== undefined
-              ? Number(asset.marketCap)
-              : undefined,
-        }));
+      const normalized: MarketAsset[] =
+        receivedMarkets
+          .filter(
+            (asset): asset is MarketApiAsset =>
+              typeof asset === "object" &&
+              asset !== null &&
+              typeof (asset as MarketApiAsset)
+                .symbol === "string" &&
+              typeof (asset as MarketApiAsset)
+                .name === "string",
+          )
+          .map((asset, index) => {
+            const symbol = String(
+              asset.symbol,
+            )
+              .trim()
+              .toUpperCase();
+
+            const name = String(asset.name).trim();
+
+            const id =
+              typeof asset.id === "string" &&
+              asset.id.trim().length > 0
+                ? asset.id.trim()
+                : `${symbol}-${index}`;
+
+            return {
+              id,
+              symbol,
+              name,
+              price: safeNumber(
+                asset.price,
+                NaN,
+              ),
+              change24h: safeNumber(
+                asset.change24h,
+                0,
+              ),
+              volume24h: optionalNumber(
+                asset.volume24h,
+              ),
+              marketCap: optionalNumber(
+                asset.marketCap,
+              ),
+            };
+          });
 
       setMarkets(normalized);
       setLastUpdated(new Date());
@@ -217,14 +319,31 @@ export default function MarketsPage() {
   };
 
   useEffect(() => {
-    loadProfile();
-    loadMarkets();
+    let mounted = true;
+
+    const initialize = async () => {
+      if (!mounted) {
+        return;
+      }
+
+      await Promise.all([
+        loadProfile(),
+        loadMarkets(),
+      ]);
+    };
+
+    initialize();
 
     const interval = window.setInterval(() => {
-      loadMarkets();
+      if (mounted) {
+        loadMarkets();
+      }
     }, 60_000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      mounted = false;
+      window.clearInterval(interval);
+    };
   }, []);
 
   const logout = async () => {
@@ -232,67 +351,135 @@ export default function MarketsPage() {
     router.replace("/login");
   };
 
-  const externalMarkets = useMemo(() => {
-    const knownSymbols = new Set(FALLBACK_ASSETS.map((asset) => asset.symbol));
+  const externalMarkets = useMemo<MarketAsset[]>(
+    () => {
+      const knownSymbols = new Set(
+        FALLBACK_ASSETS.map(
+          (asset) => asset.symbol,
+        ),
+      );
 
-    const matching = markets.filter((asset) =>
-      knownSymbols.has(asset.symbol)
-    );
+      const matching = markets.filter((asset) =>
+        knownSymbols.has(asset.symbol),
+      );
 
-    return FALLBACK_ASSETS.map((base) => {
-      const live = matching.find((asset) => asset.symbol === base.symbol);
+      return FALLBACK_ASSETS.map((base) => {
+        const live = matching.find(
+          (asset) =>
+            asset.symbol === base.symbol,
+        );
 
-      return (
-        live ?? {
+        if (live) {
+          return {
+            id: live.id,
+            symbol: live.symbol,
+            name: live.name,
+            price: safeNumber(
+              live.price,
+              NaN,
+            ),
+            change24h: safeNumber(
+              live.change24h,
+              0,
+            ),
+            volume24h: optionalNumber(
+              live.volume24h,
+            ),
+            marketCap: optionalNumber(
+              live.marketCap,
+            ),
+          };
+        }
+
+        return {
           id: base.symbol,
           symbol: base.symbol,
           name: base.name,
           price: NaN,
           change24h: 0,
-        }
-      );
-    });
-  }, [markets]);
+          volume24h: undefined,
+          marketCap: undefined,
+        };
+      });
+    },
+    [markets],
+  );
 
   const filteredMarkets = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const query = search
+      .trim()
+      .toLowerCase();
 
-    let result = externalMarkets.filter((asset) => {
-      if (!query) return true;
+    let result = externalMarkets.filter(
+      (asset) => {
+        if (!query) {
+          return true;
+        }
 
-      return (
-        asset.symbol.toLowerCase().includes(query) ||
-        asset.name.toLowerCase().includes(query)
-      );
-    });
+        return (
+          asset.symbol
+            .toLowerCase()
+            .includes(query) ||
+          asset.name
+            .toLowerCase()
+            .includes(query)
+        );
+      },
+    );
 
     if (filter === "gainers") {
-      result = result.filter((asset) => asset.change24h > 0);
+      result = result.filter(
+        (asset) =>
+          safeNumber(asset.change24h) > 0,
+      );
     }
 
     if (filter === "losers") {
-      result = result.filter((asset) => asset.change24h < 0);
+      result = result.filter(
+        (asset) =>
+          safeNumber(asset.change24h) < 0,
+      );
     }
 
     return result;
-  }, [externalMarkets, search, filter]);
+  }, [
+    externalMarkets,
+    search,
+    filter,
+  ]);
 
-  const gainers = externalMarkets.filter((asset) => asset.change24h > 0);
-  const losers = externalMarkets.filter((asset) => asset.change24h < 0);
+  const gainers = externalMarkets.filter(
+    (asset) =>
+      safeNumber(asset.change24h) > 0,
+  );
 
-  const btc = externalMarkets.find((asset) => asset.symbol === "BTC");
+  const losers = externalMarkets.filter(
+    (asset) =>
+      safeNumber(asset.change24h) < 0,
+  );
+
+  const btc = externalMarkets.find(
+    (asset) => asset.symbol === "BTC",
+  );
+
+  const btcChange = btc
+    ? safeNumber(btc.change24h, 0)
+    : null;
 
   const displayName =
     profile?.full_name ||
     profile?.username ||
     "Investor";
 
-  const initials = displayName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "U";
+  const initials =
+    displayName
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) =>
+        part[0]?.toUpperCase(),
+      )
+      .join("") || "U";
 
   if (loading) {
     return (
@@ -321,128 +508,215 @@ export default function MarketsPage() {
 
       {sidebarOpen && (
         <button
+          type="button"
           className="mobile-overlay"
           aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() =>
+            setSidebarOpen(false)
+          }
         />
       )}
 
       <aside
-        className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}
+        className={`dashboard-sidebar ${
+          sidebarOpen ? "open" : ""
+        }`}
       >
         <div className="sidebar-brand">
           <BrandLogo compact />
+
           <button
             className="sidebar-close"
             type="button"
             aria-label="Close navigation"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              setSidebarOpen(false)
+            }
           >
             ×
           </button>
         </div>
 
         <div className="account-mini-card">
-          <div className="mini-avatar">{initials}</div>
+          <div className="mini-avatar">
+            {initials}
+          </div>
+
           <div className="mini-account-info">
             <strong>{displayName}</strong>
-            <span>{profile?.account_id || "CCT Account"}</span>
+            <span>
+              {profile?.account_id ||
+                "CCT Account"}
+            </span>
           </div>
+
           <span className="online-indicator" />
         </div>
 
         <div className="sidebar-section">
-          <div className="sidebar-label">PLATFORM</div>
+          <div className="sidebar-label">
+            PLATFORM
+          </div>
 
           <nav className="sidebar-menu">
             <Link
               href="/dashboard"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">⌂</span>
-              <span className="menu-label">Overview</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ⌂
+              </span>
+              <span className="menu-label">
+                Overview
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/wallet"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">◈</span>
-              <span className="menu-label">Wallet</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ◈
+              </span>
+              <span className="menu-label">
+                Wallet
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/transactions"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">⇄</span>
-              <span className="menu-label">Transactions</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ⇄
+              </span>
+              <span className="menu-label">
+                Transactions
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/transfer"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">➤</span>
-              <span className="menu-label">Transfer</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ➤
+              </span>
+              <span className="menu-label">
+                Transfer
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/deposit"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">↓</span>
-              <span className="menu-label">Deposit</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ↓
+              </span>
+              <span className="menu-label">
+                Deposit
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/withdraw"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">↑</span>
-              <span className="menu-label">Withdraw</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ↑
+              </span>
+              <span className="menu-label">
+                Withdraw
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/investments"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">◉</span>
-              <span className="menu-label">Investments</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ◉
+              </span>
+              <span className="menu-label">
+                Investments
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
 
             <Link
               href="/dashboard/markets"
               className="sidebar-menu-item active"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">▥</span>
-              <span className="menu-label">Markets</span>
+              <span className="menu-icon">
+                ▥
+              </span>
+              <span className="menu-label">
+                Markets
+              </span>
               <span className="active-indicator" />
             </Link>
 
             <Link
               href="/dashboard/swap"
               className="sidebar-menu-item"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() =>
+                setSidebarOpen(false)
+              }
             >
-              <span className="menu-icon">⇄</span>
-              <span className="menu-label">Swap</span>
-              <span className="menu-arrow">›</span>
+              <span className="menu-icon">
+                ⇄
+              </span>
+              <span className="menu-label">
+                Swap
+              </span>
+              <span className="menu-arrow">
+                ›
+              </span>
             </Link>
           </nav>
         </div>
@@ -451,11 +725,19 @@ export default function MarketsPage() {
           <Link
             href="/dashboard/settings"
             className="sidebar-menu-item settings-item"
-            onClick={() => setSidebarOpen(false)}
+            onClick={() =>
+              setSidebarOpen(false)
+            }
           >
-            <span className="menu-icon">⚙</span>
-            <span className="menu-label">Settings</span>
-            <span className="menu-arrow">›</span>
+            <span className="menu-icon">
+              ⚙
+            </span>
+            <span className="menu-label">
+              Settings
+            </span>
+            <span className="menu-arrow">
+              ›
+            </span>
           </Link>
 
           <button
@@ -463,8 +745,12 @@ export default function MarketsPage() {
             className="sidebar-menu-item logout-button"
             onClick={logout}
           >
-            <span className="menu-icon">↪</span>
-            <span className="menu-label">Sign Out</span>
+            <span className="menu-icon">
+              ↪
+            </span>
+            <span className="menu-label">
+              Sign Out
+            </span>
           </button>
         </div>
       </aside>
@@ -476,7 +762,9 @@ export default function MarketsPage() {
               type="button"
               className="mobile-menu"
               aria-label="Open navigation"
-              onClick={() => setSidebarOpen(true)}
+              onClick={() =>
+                setSidebarOpen(true)
+              }
             >
               <span />
               <span />
@@ -484,7 +772,10 @@ export default function MarketsPage() {
             </button>
 
             <div>
-              <div className="header-eyebrow">CRYPTO MARKETS</div>
+              <div className="header-eyebrow">
+                CRYPTO MARKETS
+              </div>
+
               <h1>Markets</h1>
             </div>
           </div>
@@ -500,10 +791,19 @@ export default function MarketsPage() {
 
             <div className="header-account">
               <div className="account-info">
-                <strong>{displayName}</strong>
-                <span>{profile?.account_id || "CCT Account"}</span>
+                <strong>
+                  {displayName}
+                </strong>
+
+                <span>
+                  {profile?.account_id ||
+                    "CCT Account"}
+                </span>
               </div>
-              <div className="account-avatar">{initials}</div>
+
+              <div className="account-avatar">
+                {initials}
+              </div>
             </div>
           </div>
         </header>
@@ -517,19 +817,30 @@ export default function MarketsPage() {
 
         <section className="markets-welcome">
           <div className="markets-welcome-content">
-            <span className="welcome-tag">LIVE MARKET DATA</span>
-            <h2>Track the digital asset market.</h2>
+            <span className="welcome-tag">
+              LIVE MARKET DATA
+            </span>
+
+            <h2>
+              Track the digital asset market.
+            </h2>
+
             <p>
-              Monitor supported crypto assets and keep an eye on market
-              movement before swapping or managing your portfolio.
+              Monitor supported crypto assets
+              and keep an eye on market movement
+              before swapping or managing your
+              portfolio.
             </p>
 
             <div className="markets-live-status">
               <span className="markets-live-dot" />
+
               <span>
                 {marketLoading
                   ? "Updating market data..."
-                  : `Last updated ${formatUpdated(lastUpdated)}`}
+                  : `Last updated ${formatUpdated(
+                      lastUpdated,
+                    )}`}
               </span>
             </div>
           </div>
@@ -547,23 +858,28 @@ export default function MarketsPage() {
             </div>
 
             <div className="markets-btc-price">
-              {btc && Number.isFinite(btc.price)
-                ? `$${formatPrice(btc.price)}`
+              {btc &&
+              Number.isFinite(
+                Number(btc.price),
+              )
+                ? `$${formatPrice(
+                    btc.price,
+                  )}`
                 : "—"}
             </div>
 
             <div
               className={`markets-change ${
-                btc?.change24h && btc.change24h >= 0
+                btcChange !== null &&
+                btcChange >= 0
                   ? "positive"
                   : "negative"
               }`}
             >
-              {btc?.change24h !== undefined
-                ? `${btc.change24h >= 0 ? "+" : ""}${btc.change24h.toFixed(
-                    2
-                  )}%`
+              {btcChange !== null
+                ? formatChange(btcChange)
                 : "—"}
+
               <span>24h</span>
             </div>
           </div>
@@ -571,15 +887,23 @@ export default function MarketsPage() {
 
         <section className="markets-stats-grid">
           <div className="markets-stat-card">
-            <div className="markets-stat-icon">◈</div>
+            <div className="markets-stat-icon">
+              ◈
+            </div>
+
             <div>
               <span>TRACKED ASSETS</span>
-              <strong>{externalMarkets.length}</strong>
+              <strong>
+                {externalMarkets.length}
+              </strong>
             </div>
           </div>
 
           <div className="markets-stat-card">
-            <div className="markets-stat-icon gain">↗</div>
+            <div className="markets-stat-icon gain">
+              ↗
+            </div>
+
             <div>
               <span>24H GAINERS</span>
               <strong>{gainers.length}</strong>
@@ -587,7 +911,10 @@ export default function MarketsPage() {
           </div>
 
           <div className="markets-stat-card">
-            <div className="markets-stat-icon loss">↘</div>
+            <div className="markets-stat-icon loss">
+              ↘
+            </div>
+
             <div>
               <span>24H LOSERS</span>
               <strong>{losers.length}</strong>
@@ -595,9 +922,15 @@ export default function MarketsPage() {
           </div>
 
           <div className="markets-stat-card cct">
-            <div className="markets-stat-icon cct-icon">C</div>
+            <div className="markets-stat-icon cct-icon">
+              C
+            </div>
+
             <div>
-              <span>CCT REFERENCE VALUE</span>
+              <span>
+                CCT REFERENCE VALUE
+              </span>
+
               <strong>$1.00</strong>
             </div>
           </div>
@@ -605,13 +938,18 @@ export default function MarketsPage() {
 
         <section className="markets-cct-panel">
           <div className="markets-cct-mark">
-            <div className="markets-cct-icon">C</div>
+            <div className="markets-cct-icon">
+              C
+            </div>
           </div>
 
           <div className="markets-cct-content">
             <div className="markets-cct-heading">
               <div>
-                <span className="section-eyebrow">PLATFORM ASSET</span>
+                <span className="section-eyebrow">
+                  PLATFORM ASSET
+                </span>
+
                 <h3>Crypto Com Token</h3>
               </div>
 
@@ -621,9 +959,11 @@ export default function MarketsPage() {
             </div>
 
             <p>
-              CCT is the internal asset used across the Crypto Com
-              Exchange platform for transfers, investments and supported
-              swap operations.
+              CCT is the internal asset used
+              across the Crypto Com Exchange
+              platform for transfers,
+              investments and supported swap
+              operations.
             </p>
 
             <div className="markets-cct-meta">
@@ -639,6 +979,7 @@ export default function MarketsPage() {
 
               <div>
                 <span>MARKET STATUS</span>
+
                 <strong className="cct-status">
                   <span />
                   Platform Asset
@@ -659,7 +1000,10 @@ export default function MarketsPage() {
         <section className="markets-section">
           <div className="markets-section-heading">
             <div>
-              <span className="section-eyebrow">SUPPORTED ASSETS</span>
+              <span className="section-eyebrow">
+                SUPPORTED ASSETS
+              </span>
+
               <h2>Market Overview</h2>
             </div>
 
@@ -672,35 +1016,58 @@ export default function MarketsPage() {
           <div className="markets-toolbar">
             <div className="markets-search">
               <span>⌕</span>
+
               <input
                 type="text"
                 placeholder="Search asset or symbol..."
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) =>
+                  setSearch(
+                    event.target.value,
+                  )
+                }
               />
             </div>
 
             <div className="markets-filters">
               <button
                 type="button"
-                className={filter === "all" ? "active" : ""}
-                onClick={() => setFilter("all")}
+                className={
+                  filter === "all"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setFilter("all")
+                }
               >
                 All Assets
               </button>
 
               <button
                 type="button"
-                className={filter === "gainers" ? "active" : ""}
-                onClick={() => setFilter("gainers")}
+                className={
+                  filter === "gainers"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setFilter("gainers")
+                }
               >
                 Gainers
               </button>
 
               <button
                 type="button"
-                className={filter === "losers" ? "active" : ""}
-                onClick={() => setFilter("losers")}
+                className={
+                  filter === "losers"
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  setFilter("losers")
+                }
               >
                 Losers
               </button>
@@ -709,9 +1076,16 @@ export default function MarketsPage() {
 
           {marketError && (
             <div className="markets-data-warning">
-              <div className="markets-warning-icon">!</div>
+              <div className="markets-warning-icon">
+                !
+              </div>
+
               <div>
-                <strong>Market data temporarily unavailable</strong>
+                <strong>
+                  Market data temporarily
+                  unavailable
+                </strong>
+
                 <p>{marketError}</p>
               </div>
 
@@ -736,16 +1110,37 @@ export default function MarketsPage() {
 
             {filteredMarkets.length === 0 ? (
               <div className="markets-empty">
-                <div className="markets-empty-icon">⌕</div>
+                <div className="markets-empty-icon">
+                  ⌕
+                </div>
+
                 <h3>No assets found</h3>
+
                 <p>
-                  Try a different asset name or symbol.
+                  Try a different asset name
+                  or symbol.
                 </p>
               </div>
             ) : (
               filteredMarkets.map((asset) => {
-                const isPositive = asset.change24h >= 0;
-                const hasPrice = Number.isFinite(asset.price);
+                const numericChange =
+                  safeNumber(
+                    asset.change24h,
+                    0,
+                  );
+
+                const isPositive =
+                  numericChange >= 0;
+
+                const hasPrice =
+                  Number.isFinite(
+                    Number(asset.price),
+                  );
+
+                const hasChange =
+                  isValidChange(
+                    asset.change24h,
+                  );
 
                 return (
                   <div
@@ -756,37 +1151,56 @@ export default function MarketsPage() {
                       <div
                         className={`markets-asset-icon ${asset.symbol.toLowerCase()}`}
                       >
-                        {assetIcons[asset.symbol] || asset.symbol[0]}
+                        {assetIcons[
+                          asset.symbol
+                        ] ||
+                          asset.symbol[0] ||
+                          "?"}
                       </div>
 
                       <div>
-                        <strong>{asset.name}</strong>
-                        <span>{asset.symbol}</span>
+                        <strong>
+                          {asset.name}
+                        </strong>
+
+                        <span>
+                          {asset.symbol}
+                        </span>
                       </div>
                     </div>
 
                     <div className="markets-price-cell">
-                      {hasPrice ? `$${formatPrice(asset.price)}` : "—"}
+                      {hasPrice
+                        ? `$${formatPrice(
+                            asset.price,
+                          )}`
+                        : "—"}
                     </div>
 
                     <div
                       className={`markets-change-cell ${
-                        isPositive ? "positive" : "negative"
+                        isPositive
+                          ? "positive"
+                          : "negative"
                       }`}
                     >
-                      {hasPrice
-                        ? `${isPositive ? "+" : ""}${asset.change24h.toFixed(
-                            2
-                          )}%`
+                      {hasChange
+                        ? formatChange(
+                            numericChange,
+                          )
                         : "—"}
                     </div>
 
                     <div className="markets-secondary-cell">
-                      {formatCompact(asset.volume24h)}
+                      {formatCompact(
+                        asset.volume24h,
+                      )}
                     </div>
 
                     <div className="markets-secondary-cell">
-                      {formatCompact(asset.marketCap)}
+                      {formatCompact(
+                        asset.marketCap,
+                      )}
                     </div>
 
                     <div className="markets-row-action">
@@ -804,26 +1218,48 @@ export default function MarketsPage() {
 
         <section className="markets-bottom-grid">
           <div className="markets-info-card">
-            <div className="markets-info-icon">◈</div>
+            <div className="markets-info-icon">
+              ◈
+            </div>
+
             <div>
-              <span className="section-eyebrow">MARKET DATA</span>
-              <h3>Stay informed before you trade.</h3>
+              <span className="section-eyebrow">
+                MARKET DATA
+              </span>
+
+              <h3>
+                Stay informed before you trade.
+              </h3>
+
               <p>
-                Market prices are refreshed periodically through the
-                platform market-data service. Prices may change between
+                Market prices are refreshed
+                periodically through the
+                platform market-data service.
+                Prices may change between
                 updates.
               </p>
             </div>
           </div>
 
           <div className="markets-security-card">
-            <div className="markets-security-icon">✓</div>
+            <div className="markets-security-icon">
+              ✓
+            </div>
+
             <div>
-              <span className="section-eyebrow">CCT ACCOUNT</span>
-              <h3>Your platform balance remains separate.</h3>
+              <span className="section-eyebrow">
+                CCT ACCOUNT
+              </span>
+
+              <h3>
+                Your platform balance remains
+                separate.
+              </h3>
+
               <p>
-                External market prices do not directly change the CCT
-                balance held in your internal wallet.
+                External market prices do not
+                directly change the CCT balance
+                held in your internal wallet.
               </p>
             </div>
           </div>
